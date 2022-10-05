@@ -137,16 +137,4 @@ def noteBook(message):
         txt = "Контакт успешно обновлен"
         bot.send_message(message.chat.id, txt)
 
-
-
-
-
-
-
-
-
-
-
-
-
 bot.polling(none_stop=True)
