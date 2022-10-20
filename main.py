@@ -73,14 +73,19 @@ def prop(message):
 @bot.message_handler(content_types=["text"])
 def noteBook(message):
     data = message.text.split(',')
+
     if len(data) == 3:
-        sql = " INSERT INTO users (name, num, adres) VALUES (%s, %s, %s)"
-        cur.execute(sql, data)
-        db.commit()
-        bot.send_message(message.chat.id, 'Контакт успешно добавлен')
+        try:
+            sql = " INSERT INTO users (name, num, adres) VALUES (%s, %s, %s)"
+            cur.execute(sql, data)
+            db.commit()
+            bot.send_message(message.chat.id, 'Контакт успешно добавлен')
+        except Exception:
+            txt = "Имя с таким контактом уже существует"
+            bot.send_message(message.chat.id, txt)
 
 
-    if len(data) == 2:
+    elif len(data) == 2:
         data[0] = data[0].lower()
         data[1] = data[1].strip()
         cor = (data[1],)
@@ -107,7 +112,7 @@ def noteBook(message):
             bot.send_message(message.chat.id, txt)
 
 
-    if len(data) == 5:
+    elif len(data) == 5:
         cor = (data[1],)
         checkNameVar = checkName(cor)
         if checkNameVar == True:
@@ -161,6 +166,10 @@ def noteBook(message):
             for user in users:
                 txt = (f'Имя: {user[1]}  |  Номер: {user[2]} | Адрес: {user[3]}')
                 bot.send_message(message.chat.id, txt)
+        else:
+            txt = "Я не понимаю"
+            bot.send_message(message.chat.id, txt)
+
 
 
 bot.polling(none_stop=True)
