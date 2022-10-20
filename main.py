@@ -36,16 +36,28 @@ cur.execute(''' CREATE TABLE IF NOT EXISTS users (
 ) ''')
 
 
+# Функция для проверки имени на существование
+def checkName(isName):
+    sql = "SELECT name FROM users"
+    cur.execute(sql)
+    names = cur.fetchall()
+    p = len(names) - 1
+    for i in range(len(names)):
+        if names[i] == isName:
+            return True
+        elif names[i] != isName and i == p:
+            return False
+        else:
+            continue
 
 
 
 @bot.message_handler(commands=["start"])
 def start(message):
-    m=f"  Приветик)). Я бот-записная книжка, могу хранить информацию о твоих знакомых, друзьях, родственнииках, а может даже и не твоих.\n В общем я могу быть полезным помощником в хранении информации. \n /notebook "
+    m=f"  Приветик)). Я бот-записная книжка, могу хранить информацию о твоих знакомых, друзьях, родственнииках, а может даже и не твоих." \
+      f"\n В общем я могу быть полезным помощником в хранении информации. " \
+      f"\n /notebook "
     bot.send_message(message.chat.id, m)
-
-
-
 
 
 
@@ -68,6 +80,52 @@ def noteBook(message):
         bot.send_message(message.chat.id, 'Контакт успешно добавлен')
 
 
+    if len(data) == 2:
+        data[0] = data[0].lower()
+        data[1] = data[1].strip()
+        cor = (data[1],)
+        checkNameVar = checkName(cor)
+        if checkNameVar == True:
+            if data[0] == 'delete':
+                cor = (data[1],)
+                sql = 'DELETE FROM `users` WHERE users.name = %s'
+                cur.execute(sql, cor)
+                db.commit()
+                txt = "Контакт успешно удален"
+                bot.send_message(message.chat.id, txt)
+
+            if data[0] == 'find':
+                cor = (data[1], data[1], data[1] )
+                sql = ' SELECT * FROM `users` WHERE users.name = %s OR users.num = %s OR users.adres = %s '
+                cur.execute(sql, cor)
+                users = cur.fetchall()
+                for user in users:
+                    contact = (f'Имя: {user[1]}  \n  Номер: {user[2]} \n Адрес: {user[3]} ')
+                    bot.send_message(message.chat.id, contact)
+        elif checkNameVar == False:
+            txt = "Контакта не существует"
+            bot.send_message(message.chat.id, txt)
+
+
+    if len(data) == 5:
+        cor = (data[1],)
+        checkNameVar = checkName(cor)
+        if checkNameVar == True:
+            data[0] = data[0].lower()
+            data[1] = data[1].strip()
+            data[2] = data[2].strip()
+            data[3] = data[3].strip()
+            data[4] = data[4].strip()
+            sql = "UPDATE users SET users.name = %s, users.num = %s, users.adres = %s WHERE users.name = %s "
+            cor = (data[2], data[3], data[4], data[1]  )
+            cur.execute(sql, cor)
+            db.commit()
+            txt = "Контакт успешно обновлен"
+            bot.send_message(message.chat.id, txt)
+
+        elif checkNameVar == False:
+            txt = "Контакта не существует"
+            bot.send_message(message.chat.id, txt)
 
     else:
 
@@ -104,37 +162,5 @@ def noteBook(message):
                 txt = (f'Имя: {user[1]}  |  Номер: {user[2]} | Адрес: {user[3]}')
                 bot.send_message(message.chat.id, txt)
 
-    if len(data) == 2:
-        data[0] = data[0].lower()
-        data[1] = data[1].strip()
-        if data[0] == 'delete':
-            cor = (data[1],)
-            sql = 'DELETE FROM `users` WHERE users.name = %s'
-            cur.execute(sql, cor)
-            db.commit()
-            txt = "Контакт успешно удален"
-            bot.send_message(message.chat.id, txt)
-
-        if data[0] == 'find':
-            cor = (data[1], data[1], data[1] )
-            sql = ' SELECT * FROM `users` WHERE users.name = %s OR users.num = %s OR users.adres = %s '
-            cur.execute(sql, cor)
-            users = cur.fetchall()
-            for user in users:
-                contact = (f'Имя: {user[1]}  \n  Номер: {user[2]} \n Адрес: {user[3]} ')
-                bot.send_message(message.chat.id, contact)
-
-    if len(data) == 5:
-        data[0] = data[0].lower()
-        data[1] = data[1].strip()
-        data[2] = data[2].strip()
-        data[3] = data[3].strip()
-        data[4] = data[4].strip()
-        sql = "UPDATE users SET users.name = %s, users.num = %s, users.adres = %s WHERE users.name = %s "
-        cor = (data[2], data[3], data[4], data[1]  )
-        cur.execute(sql, cor)
-        db.commit()
-        txt = "Контакт успешно обновлен"
-        bot.send_message(message.chat.id, txt)
 
 bot.polling(none_stop=True)
