@@ -81,7 +81,7 @@ def noteBook(message):
             db.commit()
             bot.send_message(message.chat.id, 'Контакт успешно добавлен')
         except Exception:
-            txt = "Имя с таким контактом уже существует"
+            txt = "Контакт с таким именем уже существует"
             bot.send_message(message.chat.id, txt)
 
 
@@ -90,8 +90,9 @@ def noteBook(message):
         data[1] = data[1].strip()
         cor = (data[1],)
         checkNameVar = checkName(cor)
-        if checkNameVar == True:
-            if data[0] == 'delete':
+
+        if data[0] == 'delete':
+            if checkNameVar == True:
                 cor = (data[1],)
                 sql = 'DELETE FROM `users` WHERE users.name = %s'
                 cur.execute(sql, cor)
@@ -99,17 +100,31 @@ def noteBook(message):
                 txt = "Контакт успешно удален"
                 bot.send_message(message.chat.id, txt)
 
-            if data[0] == 'find':
-                cor = (data[1], data[1], data[1] )
-                sql = ' SELECT * FROM `users` WHERE users.name = %s OR users.num = %s OR users.adres = %s '
+            elif checkNameVar == False:
+                txt = "Контакта не существует"
+                bot.send_message(message.chat.id, txt)
+
+        elif data[0] == 'find':
+
+            if checkNameVar == True:
+                cor = (data[1],)
+                sql = ' SELECT * FROM `users` WHERE users.name = %s '
                 cur.execute(sql, cor)
                 users = cur.fetchall()
+
                 for user in users:
                     contact = (f'Имя: {user[1]}  \n  Номер: {user[2]} \n Адрес: {user[3]} ')
                     bot.send_message(message.chat.id, contact)
-        elif checkNameVar == False:
-            txt = "Контакта не существует"
+
+            elif checkNameVar == False:
+                txt = "Контакта не существует"
+                bot.send_message(message.chat.id, txt)
+
+        else:
+            txt = "Я не понимаю"
             bot.send_message(message.chat.id, txt)
+
+
 
 
     elif len(data) == 5:
@@ -122,7 +137,7 @@ def noteBook(message):
             data[3] = data[3].strip()
             data[4] = data[4].strip()
             sql = "UPDATE users SET users.name = %s, users.num = %s, users.adres = %s WHERE users.name = %s "
-            cor = (data[2], data[3], data[4], data[1]  )
+            cor = (data[2], data[3], data[4], data[1])
             cur.execute(sql, cor)
             db.commit()
             txt = "Контакт успешно обновлен"
@@ -164,7 +179,7 @@ def noteBook(message):
             cur.execute('SELECT * FROM users')
             users = cur.fetchall()
             for user in users:
-                txt = (f'Имя: {user[1]}  |  Номер: {user[2]} | Адрес: {user[3]}')
+                txt = (f'Имя: {user[1]}  \n  Номер: {user[2]} \n Адрес: {user[3]} ')
                 bot.send_message(message.chat.id, txt)
         else:
             txt = "Я не понимаю"
