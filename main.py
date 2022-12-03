@@ -123,8 +123,21 @@ def noteBook(message):
                 users = cur.fetchall()
 
                 for user in users:
-                    contact = (f'Имя: {user[1]}  \n  Номер: {user[2]} \n Адрес: {user[3]} ')
-                    bot.send_message(message.chat.id, contact)
+
+                    sql = "SELECT * FROM notes WHERE notes.user_id = %s"
+                    cor = (user[0],)
+                    cur.execute(sql, cor)
+                    notes = cur.fetchall()
+                    for note in notes:
+                        sql = "SELECT * FROM typeOfRelationShip WHERE typeOfRelationShip.id_user = %s"
+                        cor = (user[0],)
+                        cur.execute(sql, cor)
+                        TORS = cur.fetchall()
+                        for TOR in TORS:
+                            txt = (
+                                f'Имя: {user[1]}  \n  Номер: {user[2]} \n Адрес: {user[3]} \n Событие: {note[2]} \n Дата события: {note[3]} \n {TOR[2]}')
+
+                            bot.send_message(message.chat.id, txt)
 
             elif checkNameVar == False:
                 txt = "Контакта не существует"
@@ -228,8 +241,22 @@ def noteBook(message):
             cur.execute('SELECT * FROM users')
             users = cur.fetchall()
             for user in users:
-                txt = (f'Имя: {user[1]}  \n  Номер: {user[2]} \n Адрес: {user[3]} ')
-                bot.send_message(message.chat.id, txt)
+                sql = "SELECT * FROM notes WHERE notes.user_id = %s"
+                cor = (user[0],)
+                cur.execute(sql, cor)
+                notes = cur.fetchall()
+                for note in notes:
+                    sql = "SELECT * FROM typeOfRelationShip WHERE typeOfRelationShip.id_user = %s"
+                    cor = (user[0],)
+                    cur.execute(sql, cor)
+                    TORS = cur.fetchall()
+                    for TOR in TORS:
+
+                        txt = (f'Имя: {user[1]}  \n  Номер: {user[2]} \n Адрес: {user[3]} \n Событие: {note[2]} \n Дата события: {note[3]} \n {TOR[2]}')
+
+                        bot.send_message(message.chat.id, txt)
+
+
 
         elif message.text.strip()  == '1':
             sql = "SELECT id FROM users WHERE id  =  (SELECT MAX(id) FROM users)"
